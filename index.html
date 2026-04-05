@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rates Page</title>
+</head>
+<body>
+    <h1>Current Rates</h1>
+    <div id="rates">Detecting your location...</div>
+
+    <script>
+        // Ask for geolocation
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showRates, showError);
+        } else {
+            document.getElementById("rates").innerText = "Geolocation is not supported by this browser.";
+        }
+
+        function showRates(position) {
+            let lat = position.coords.latitude;
+            let lon = position.coords.longitude;
+            let rates = "";
+
+            // Example: Set rates based on location
+            if(lat > 6 && lat < 7 && lon > 79 && lon < 80){
+                rates = "Rates for Colombo area: LKR 1,500";
+            } else if(lat > 5 && lat < 6 && lon > 80 && lon < 81){
+                rates = "Rates for Kandy area: LKR 1,200";
+            } else {
+                rates = "Standard Rates: LKR 1,000";
+            }
+
+            document.getElementById("rates").innerText = rates;
+        }
+
+        function showError(error) {
+            document.getElementById("rates").innerText = "Unable to detect location. Showing standard rates: LKR 1,000";
+        }
+    </script>
+</body>
+</html>
