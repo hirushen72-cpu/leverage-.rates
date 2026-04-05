@@ -1,40 +1,78 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Rates Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location-Based Rates</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+        h1 { color: #333; }
+        input, button { padding: 10px; font-size: 16px; margin: 5px; }
+        #rates { margin-top: 20px; font-size: 20px; font-weight: bold; color: #2a7ae2; }
+    </style>
 </head>
 <body>
-    <h1>Current Rates</h1>
-    <div id="rates">Detecting your location...</div>
+
+    <h1>Check Rates by Location</h1>
+    <p>You can let the browser detect your location or enter your area manually.</p>
+
+    <button onclick="detectLocation()">Detect My Location</button>
+    <br><br>
+    <input type="text" id="locationInput" placeholder="Enter your city/area">
+    <button onclick="showRatesByInput()">Check Rates</button>
+
+    <div id="rates">Rates will appear here...</div>
 
     <script>
-        // Ask for geolocation
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showRates, showError);
-        } else {
-            document.getElementById("rates").innerText = "Geolocation is not supported by this browser.";
+        // Example rates by city
+        const ratesData = {
+            "Colombo": "LKR 1,500",
+            "Kandy": "LKR 1,200",
+            "Galle": "LKR 1,000"
+        };
+
+        // Function to detect browser location
+        function detectLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showRatesByCoords, showError);
+            } else {
+                document.getElementById("rates").innerText = "Geolocation not supported.";
+            }
         }
 
-        function showRates(position) {
+        function showRatesByCoords(position) {
             let lat = position.coords.latitude;
             let lon = position.coords.longitude;
             let rates = "";
 
-            // Example: Set rates based on location
+            // Simple example: decide city by latitude/longitude
             if(lat > 6 && lat < 7 && lon > 79 && lon < 80){
-                rates = "Rates for Colombo area: LKR 1,500";
-            } else if(lat > 5 && lat < 6 && lon > 80 && lon < 81){
-                rates = "Rates for Kandy area: LKR 1,200";
+                rates = "Colombo Rates: " + ratesData["Colombo"];
+            } else if(lat > 7 && lat < 8 && lon > 80 && lon < 81){
+                rates = "Kandy Rates: " + ratesData["Kandy"];
             } else {
-                rates = "Standard Rates: LKR 1,000";
+                rates = "Galle Rates: " + ratesData["Galle"];
             }
 
             document.getElementById("rates").innerText = rates;
         }
 
+        // Function to show rates by manual input
+        function showRatesByInput() {
+            const input = document.getElementById("locationInput").value.trim();
+            const rate = ratesData[input];
+
+            if(rate){
+                document.getElementById("rates").innerText = `${input} Rates: ${rate}`;
+            } else {
+                document.getElementById("rates").innerText = `No rates found for "${input}"`;
+            }
+        }
+
         function showError(error) {
-            document.getElementById("rates").innerText = "Unable to detect location. Showing standard rates: LKR 1,000";
+            document.getElementById("rates").innerText = "Unable to detect location. Please enter manually.";
         }
     </script>
+
 </body>
 </html>
