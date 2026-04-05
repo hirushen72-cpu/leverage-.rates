@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEVERAGE</title>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD5BSxdQcJe7OX83r3czhqg6jGCUBe_ZWY"></script>
+
+<style>
+body { font-family: Arial; text-align:center; background:#f8f6f3; }
+.logo { font-size:40px; margin-top:20px; }
+.page { display:none; padding:20px; }
+.active { display:block; }
+
+input, textarea {
+    padding:10px;
+    margin:10px;
+    width:80%;
+    max-width:300px;
+}
+
+button {
+    background:red;
+    color:white;
+    padding:12px 25px;
+    border:none;
+    border-radius:8px;
+}
+
+.spin { animation: spin 2s linear infinite; width:70px; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+</style>
+</head>
+
+<body>
+
+<h1 class="logo">LEVERAGE</h1>
+
+<!-- PAGE 1 -->
+<div id="p1" class="page active">
+<input id="name" placeholder="Name"><br>
+<input id="phone" placeholder="Phone"><br>
+<button onclick="go(2)">Save Me</button>
+</div>
+
+<!-- PAGE 2 -->
+<div id="p2" class="page">
+<button onclick="open('site')">Site Visit</button>
+<button onclick="open('floor')">Floor Marking</button>
+<button onclick="open('plan')">Project Plan</button>
+<button onclick="open('consult')">Consultation</button>
+</div>
+
+<!-- SITE VISIT -->
+<div id="site" class="page">
+<img src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png" class="spin">
+
+<h2>Site Visit</h2>
+
+<input id="location" placeholder="Enter destination">
+<input type="date" id="date">
+
+<h3 id="price">Price: -</h3>
+
+<textarea id="comments" placeholder="Comments"></textarea>
+
+<button onclick="calc()">Calculate Price</button>
+<button onclick="submitData()">Submit</button>
+</div>
+
+<script>
+
+let price = 0;
+
+function go(p){
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+    document.getElementById("p"+p).classList.add('active');
+
+    localStorage.setItem("name", name.value);
+    localStorage.setItem("phone", phone.value);
+}
+
+function open(id){
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+/* REAL DISTANCE CALC */
+function calc(){
+    let destination = document.getElementById("location").value;
+
+    navigator.geolocation.getCurrentPosition(function(pos){
+
+        let origin = pos.coords.latitude + "," + pos.coords.longitude;
+
+        let service = new google.maps.DistanceMatrixService();
+
+        service.getDistanceMatrix({
+            origins: [origin],
+            destinations: [destination],
+            travelMode: 'DRIVING'
+        }, function(response){
+
+            let dist = response.rows[0].elements[0].distance.value / 1000;
+
+            if(dist < 15){
+                price = 2000;
+            } else if(dist < 120){
+                price = 5000;
+            } else {
+                price = 10000;
+            }
+
+            document.getElementById("price").innerText =
+            "Distance: " + dist.toFixed(1) + " km | Price: LKR " + price;
+        });
+
+    });
+}
+
+/* SEND TO GOOGLE SHEET */
+function submitData(){
+
+fetch("https://script.google.com/macros/s/AKfycbxVFmsIhzYS8mLsi7OJTYsmwvc6Y7Xcw1LBXNF9jSkLizT2shvoJyzC65Rw9zQVnekf/exec", {
+    method: "POST",
+    body: JSON.stringify({
+        name: localStorage.getItem("name"),
+        phone: localStorage.getItem("phone"),
+        service: "Site Visit",
+        location: document.getElementById("location").value,
+        date: document.getElementById("date").value,
+        price: price,
+        comments: document.getElementById("comments").value
+    })
+})
+.then(()=>{
+
+    window.location.href =
+    "https://wa.me/94774122145?text=Booking Confirmed LKR " + price;
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
